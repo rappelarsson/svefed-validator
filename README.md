@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Svenska Federationer MD-validator
 
 En separat, helt statisk validator f&ouml;r manuell kontroll av SAML-metadata.
@@ -98,3 +99,7 @@ Eftersom appen &auml;r helt statisk beh&ouml;vs:
 - ingen databas
 - inga Functions
 - inga milj&ouml;variabler f&ouml;r serverkod
+=======
+# svefed-validator
+Validator for SveFed interrim/lab
+>>>>>>> b729d949cb69d806a78cc1020ab24b844b4632f5
