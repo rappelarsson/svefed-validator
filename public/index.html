@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="sv">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Svenska Federationer MD-validator</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <main class="shell">
+      <header class="hero">
+        <h1>Svenska Federationer MD-validator</h1>
+        <p class="lead">
+          Ladda upp en metadatafil och f&aring; en direkt analys med fel, varningar,
+          &aring;tg&auml;rdsf&ouml;rslag och ett kopierbart underlag f&ouml;r &aring;terkoppling.
+        </p>
+      </header>
+
+      <section class="card notice-card">
+        <strong>OBS:</strong> Full konformitet till tekniska profilen &auml;r inte bekr&auml;ftad.
+        Genomf&ouml;r alltid manuell kontroll d&auml;r det beh&ouml;vs, till exempel f&ouml;r
+        <code>OrganizationName</code>, <code>OrganizationDisplayName</code>,
+        spr&aring;ks&auml;ttning, attributinneh&aring;ll och andra metadataelement enligt g&auml;llande rutin.
+      </section>
+
+      <section class="card">
+        <form id="upload-form">
+          <label for="metadata-file" class="field-label">SAML-metadatafil</label>
+          <input id="metadata-file" name="metadata_file" type="file" accept=".xml,text/xml,application/xml" required>
+          <button type="submit" id="submit-button">Analysera fil</button>
+        </form>
+        <p class="hint">
+          Denna k&ouml;rs i din webbl&auml;sare och sparar ingen information.
+        </p>
+      </section>
+
+      <section id="status-panel" class="card hidden"></section>
+      <section id="summary-panel" class="hidden"></section>
+      <section id="results-panel" class="hidden"></section>
+      <section id="mail-panel" class="hidden"></section>
+    </main>
+
+    <template id="entity-template">
+      <article class="card entity-card">
+        <button class="entity-toggle" type="button">
+          <span class="entity-heading"></span>
+          <span class="entity-badges"></span>
+        </button>
+        <div class="entity-body hidden">
+          <div class="entity-meta"></div>
+          <ul class="finding-list"></ul>
+          <details class="xml-box">
+            <summary>Visa XML</summary>
+            <pre class="xml-content"></pre>
+          </details>
+        </div>
+      </article>
+    </template>
+
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>
