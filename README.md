@@ -1,48 +1,47 @@
-<<<<<<< HEAD
 # Svenska Federationer MD-validator
 
-En separat, helt statisk validator f&ouml;r manuell kontroll av SAML-metadata.
+En separat, helt statisk validator för manuell kontroll av SAML-metadata.
 
-Den h&auml;r appen lever parallellt med den befintliga Flask-applikationen:
+Den här appen lever parallellt med den befintliga Flask-applikationen:
 
-- Flask-appen forts&auml;tter hantera snapshots, dashboard, federation-analys och historik
-- den h&auml;r appen fokuserar enbart p&aring; manuell uppladdning och validering av SAML-metadata
+- Flask-appen fortsätter hantera snapshots, dashboard, federation-analys och historik
+- den här appen fokuserar enbart på manuell uppladdning och validering av SAML-metadata
 
 ## Viktig notis
 
-Full konformitet till tekniska profilen &auml;r inte bekr&auml;ftad.
+Full konformitet till tekniska profilen är inte bekräftad.
 
-Genomf&ouml;r alltid manuell kontroll d&auml;r det beh&ouml;vs, till exempel f&ouml;r:
+Genomför alltid manuell kontroll där det behövs, till exempel för:
 
 - `OrganizationName`
 - `OrganizationDisplayName`
-- spr&aring;ks&auml;ttning
-- attributinneh&aring;ll
-- andra metadataelement enligt g&auml;llande rutin
+- språksättning
+- attributinnehåll
+- andra metadataelement enligt gällande rutin
 
-## M&aring;l
+## Mål
 
 - kunna publiceras som en helt statisk webbapp
-- inte bero p&aring; Node f&ouml;r drift
-- inte bero p&aring; SQLite eller bakgrundsjobb
-- inte p&aring;verka den befintliga appen
-- ge tydliga valideringsresultat, &aring;tg&auml;rdsf&ouml;rslag och ett kopierbart mejlunderlag
+- inte bero på Node för drift
+- inte bero på SQLite eller bakgrundsjobb
+- inte påverka den befintliga appen
+- ge tydliga valideringsresultat, åtgärdsförslag och ett kopierbart mejlunderlag
 
 ## Hur den fungerar
 
-Allt sker lokalt i webbl&auml;saren:
+Allt sker lokalt i webbläsaren:
 
-- anv&auml;ndaren v&auml;ljer en XML-fil
-- filen l&auml;ses in i JavaScript
+- användaren väljer en XML-fil
+- filen läses in i JavaScript
 - XML-filen parsas med `DOMParser`
-- valideringsreglerna k&ouml;rs direkt i browsern
-- resultatet renderas direkt p&aring; sidan
+- valideringsreglerna körs direkt i browsern
+- resultatet renderas direkt på sidan
 
-Det betyder att metadatafilen inte beh&ouml;ver laddas upp till n&aring;gon server.
+Det betyder att metadatafilen inte behöver laddas upp till någon server.
 
 ## Nuvarande status
 
-Validatorn &auml;r client-side och inneh&aring;ller ett brett urval av regler f&ouml;r:
+Validatorn är client-side och innehåller ett brett urval av regler för:
 
 - `entityID`
 - `IDPSSODescriptor` / `SPSSODescriptor`
@@ -50,11 +49,11 @@ Validatorn &auml;r client-side och inneh&aring;ller ett brett urval av regler f&
 - `Organization`
 - `ContactPerson`
 - endpoints
-- spr&aring;kregler med `xml:lang`
+- språkregler med `xml:lang`
 - `RequestedAttribute` och supported attributes
-- upload-regeln f&ouml;r OpenFed `opt-in`
+- upload-regeln för OpenFed `opt-in`
 
-Certifikat- och signaturverifiering ing&aring;r inte i detta steg.
+Certifikat- och signaturverifiering ingår inte i detta steg.
 
 ## Struktur
 
@@ -66,11 +65,14 @@ cloudflare-validator/
     app.js
     validator.js
     mail-summary.js
+    fixture-harness.html
+    fixture-harness.js
+    fixture-registry.js
 ```
 
-## Lokal k&ouml;rning utan Node
+## Lokal körning utan Node
 
-Du kan &ouml;ppna `public/index.html` direkt i en webbl&auml;sare, men enklast &auml;r ofta att servera katalogen statiskt.
+Du kan öppna `public/index.html` direkt i en webbläsare, men enklast är ofta att servera katalogen statiskt.
 
 Exempel med Python:
 
@@ -79,27 +81,46 @@ cd cloudflare-validator/public
 python -m http.server 8080
 ```
 
-&Ouml;ppna sedan:
+Öppna sedan:
 
 ```text
 http://localhost:8080
 ```
 
+## Lokal fixturesvitt
+
+Det finns också en enkel browser-baserad fixture-harness för metadatafilerna i `technical_profile_v1`.
+
+Kör från repo-roten:
+
+```powershell
+cd C:\lab\moa-check
+python -m http.server 8080
+```
+
+Öppna sedan:
+
+```text
+http://localhost:8080/cloudflare-validator/public/fixture-harness.html
+```
+
+Harnessen visar:
+
+- vilka testfiler som redan är mappade till hårda assertions
+- vilka som pass/failar mot nuvarande validator
+- vilka som ännu markeras som `skip` eftersom de ligger utanför scope eller kräver mer exakt regelstöd
+
 ## Publicering
 
-Publicera inneh&aring;llet i:
+Publicera innehållet i:
 
 ```text
 cloudflare-validator/public
 ```
 
-Eftersom appen &auml;r helt statisk beh&ouml;vs:
+Eftersom appen är helt statisk behövs:
 
 - ingen backend
 - ingen databas
 - inga Functions
-- inga milj&ouml;variabler f&ouml;r serverkod
-=======
-# svefed-validator
-Validator for SveFed interrim/lab
->>>>>>> b729d949cb69d806a78cc1020ab24b844b4632f5
+- inga miljövariabler för serverkod

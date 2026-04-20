@@ -10,6 +10,34 @@ const NS = {
 const HTTP_REDIRECT = "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect";
 const URI_NAMEFORMAT = "urn:oasis:names:tc:SAML:2.0:attrname-format:uri";
 const DISCOURAGED_ALGORITHM_MARKERS = ["md5", "sha1", "rsa-1_5"];
+const ISO_639_1_CODES = new Set([
+  "aa", "ab", "ae", "af", "ak", "am", "an", "ar", "as", "av", "ay", "az",
+  "ba", "be", "bg", "bh", "bi", "bm", "bn", "bo", "br", "bs",
+  "ca", "ce", "ch", "co", "cr", "cs", "cu", "cv", "cy",
+  "da", "de", "dv", "dz",
+  "ee", "el", "en", "eo", "es", "et", "eu",
+  "fa", "ff", "fi", "fj", "fo", "fr", "fy",
+  "ga", "gd", "gl", "gn", "gu", "gv",
+  "ha", "he", "hi", "ho", "hr", "ht", "hu", "hy", "hz",
+  "ia", "id", "ie", "ig", "ii", "ik", "io", "is", "it", "iu",
+  "ja", "jv",
+  "ka", "kg", "ki", "kj", "kk", "kl", "km", "kn", "ko", "kr", "ks", "ku", "kv", "kw", "ky",
+  "la", "lb", "lg", "li", "ln", "lo", "lt", "lu", "lv",
+  "mg", "mh", "mi", "mk", "ml", "mn", "mr", "ms", "mt", "my",
+  "na", "nb", "nd", "ne", "ng", "nl", "nn", "no", "nr", "nv", "ny",
+  "oc", "oj", "om", "or", "os",
+  "pa", "pi", "pl", "ps", "pt",
+  "qu",
+  "rm", "rn", "ro", "ru", "rw",
+  "sa", "sc", "sd", "se", "sg", "si", "sk", "sl", "sm", "sn", "so", "sq", "sr", "ss", "st", "su", "sv", "sw",
+  "ta", "te", "tg", "th", "ti", "tk", "tl", "tn", "to", "tr", "ts", "tt", "tw", "ty",
+  "ug", "uk", "ur", "uz",
+  "ve", "vi", "vo",
+  "wa", "wo",
+  "xh",
+  "yi", "yo",
+  "za", "zh", "zu",
+]);
 const OPENFED_OPT_IN_ATTRIBUTE = "https://id.openfed.se/entityattributes/opt-in";
 const OPENFED_OPT_IN_VALUE = "https://id.openfed.se/entityattributes/opt-in/yes";
 const OPENFED_OPT_IN_PROFILE_REF = "Entitetsattribut f\u00f6r opt-in \u00e4r obligatoriskt enligt federationspolicy f\u00f6r att inkluderas i metadatafeeden f\u00f6r Federation f\u00f6r kommunal verksamhet och \u00c5tkomstl\u00f6sning f\u00f6r KLASSA";
@@ -25,6 +53,7 @@ const ACTIONS = {
   missing_description: "L\u00e4gg till `mdui:Description` i metadata.",
   missing_logo: "L\u00e4gg till `mdui:Logo` i metadata.",
   mdui_missing_lang: "Komplettera MDUI-elementen med `xml:lang`.",
+  mdui_invalid_lang: "Anv\u00e4nd ett spr\u00e5kv\u00e4rde enligt ISO 639-1 i MDUI.",
   duplicate_mdui_lang: "Ta bort dubblerade spr\u00e5kvarianter i MDUI.",
   mdui_missing_en: "Komplettera MDUI med engelska (`en`).",
   mdui_missing_sv: "Komplettera MDUI med svenska (`sv`).",
@@ -36,6 +65,7 @@ const ACTIONS = {
   missing_organizationdisplayname: "L\u00e4gg till `md:OrganizationDisplayName`.",
   missing_organizationurl: "L\u00e4gg till `md:OrganizationURL`.",
   organization_missing_lang: "Komplettera `Organization`-elementen med `xml:lang`.",
+  organization_invalid_lang: "Anv\u00e4nd ett spr\u00e5kv\u00e4rde enligt ISO 639-1 i `Organization`.",
   duplicate_organization_lang: "Ta bort dubblerade spr\u00e5kvarianter i `Organization`.",
   organization_missing_en: "Komplettera `Organization` med engelska (`en`).",
   organization_missing_sv: "Komplettera `Organization` med svenska (`sv`).",
@@ -47,6 +77,7 @@ const ACTIONS = {
   duplicate_administrative_contact: "Beh\u00e5ll bara en `ContactPerson` av typen `administrative`.",
   duplicate_technical_contact: "Beh\u00e5ll bara en `ContactPerson` av typen `technical`.",
   duplicate_support_contact: "Beh\u00e5ll bara en `ContactPerson` av typen `support`.",
+  contact_person_lang_forbidden: "Ta bort `xml:lang` fr\u00e5n `ContactPerson`-element. Det ska bara finnas en kontakt per typ.",
   contact_email_must_use_mailto: "Anv\u00e4nd `mailto:` i `EmailAddress`.",
   missing_error_url: "S\u00e4tt `errorURL` p\u00e5 `IDPSSODescriptor` till en giltig felsida.",
   missing_scope: "L\u00e4gg till minst ett `shibmd:Scope`-v\u00e4rde som motsvarar organisationens dom\u00e4n.",
@@ -64,6 +95,7 @@ const ACTIONS = {
   missing_service_name: "L\u00e4gg till `ServiceName` i `AttributeConsumingService`.",
   missing_service_description: "L\u00e4gg till `ServiceDescription` i `AttributeConsumingService`.",
   attributeconsumingservice_missing_lang: "Komplettera `ServiceName` och `ServiceDescription` med `xml:lang`.",
+  attributeconsumingservice_invalid_lang: "Anv\u00e4nd ett spr\u00e5kv\u00e4rde enligt ISO 639-1 i `AttributeConsumingService`.",
   duplicate_attributeconsumingservice_lang: "Ta bort dubblerade spr\u00e5kvarianter i `AttributeConsumingService`.",
   attributeconsumingservice_missing_en: "Komplettera `AttributeConsumingService` med engelska (`en`).",
   attributeconsumingservice_missing_sv: "Komplettera `AttributeConsumingService` med svenska (`sv`).",
@@ -74,6 +106,8 @@ const ACTIONS = {
   requested_attribute_invalid_nameformat: "S\u00e4tt `NameFormat` till SAML URI-format f\u00f6r `RequestedAttribute`.",
   role_descriptor_forbidden: "Ta bort `RoleDescriptor`, som inte ska publiceras enligt profilen.",
   discouraged_algorithm: "Byt till moderna algoritmer och undvik SHA-1, MD5 eller RSA1_5.",
+  duplicate_entity_id_in_file: "S\u00e4kerst\u00e4ll att varje `entityID` bara f\u00f6rekommer en g\u00e5ng i filen.",
+  scope_not_in_extensions: "Placera `shibmd:Scope` i `md:Extensions` p\u00e5 `EntityDescriptor` eller relevant rollbeskrivning.",
   missing_openfed_opt_in: "L\u00e4gg till entitetsattributet `https://id.openfed.se/entityattributes/opt-in` med v\u00e4rdet `https://id.openfed.se/entityattributes/opt-in/yes` i `md:Extensions`.",
   invalid_openfed_opt_in_nameformat: "S\u00e4tt `NameFormat` till `urn:oasis:names:tc:SAML:2.0:attrname-format:uri`.",
   invalid_openfed_opt_in_value: "S\u00e4tt attributv\u00e4rdet till `https://id.openfed.se/entityattributes/opt-in/yes`.",
@@ -169,14 +203,28 @@ function validateLangPresence(findings, nodes, profileRef, label) {
     if (lang) allLangs.add(lang);
   }
 
+  const missingLangElements = [];
+  const invalidLangElements = [];
   for (const [name, langs] of perName.entries()) {
     const langValues = langs.filter(Boolean);
     if (langs.some((lang) => !lang)) {
-      addFinding(findings, "error", `${codeStem}_missing_lang`, `${name} saknar xml:lang, vilket kr\u00e4vs enligt profilen.`, profileRef);
+      missingLangElements.push(name);
     }
-    if (name !== "Logo" && langValues.length !== new Set(langValues).size) {
+    for (const lang of langValues) {
+      if (!ISO_639_1_CODES.has(lang)) {
+        invalidLangElements.push(`${name}=${lang}`);
+      }
+    }
+    if (langValues.length !== new Set(langValues).size) {
       addFinding(findings, "error", `duplicate_${codeStem}_lang`, `${name} inneh\u00e5ller dubblerade spr\u00e5kv\u00e4rden, vilket inte \u00e4r till\u00e5tet enligt profilen.`, profileRef);
     }
+  }
+
+  if (missingLangElements.length) {
+    addFinding(findings, "error", `${codeStem}_missing_lang`, `${label}-element saknar xml:lang: ${missingLangElements.join(", ")}.`, profileRef);
+  }
+  if (invalidLangElements.length) {
+    addFinding(findings, "error", `${codeStem}_invalid_lang`, `${label}-element har ogiltiga spr\u00e5kv\u00e4rden: ${invalidLangElements.join(", ")}.`, profileRef);
   }
 
   if (!allLangs.has("en")) {
@@ -186,12 +234,13 @@ function validateLangPresence(findings, nodes, profileRef, label) {
     addFinding(findings, "error", `${codeStem}_missing_sv`, `${label} beh\u00f6ver finnas p\u00e5 svenska (\`sv\`) f\u00f6r att uppfylla profilens krav.`, profileRef);
   }
 
-  for (const lang of allLangs) {
-    for (const [name, langs] of perName.entries()) {
-      if (name === "Logo") continue;
-      if (!langs.filter(Boolean).includes(lang)) {
-        addFinding(findings, "error", `inconsistent_${codeStem}_langs`, `Spr\u00e5ket ${lang} anv\u00e4nds inte konsekvent f\u00f6r alla ${label}-element, vilket avviker fr\u00e5n profilens krav.`, profileRef);
-      }
+  for (const [name, langs] of perName.entries()) {
+    const presentLangs = [...new Set(langs.filter(Boolean))].sort();
+    const missingLangs = [...allLangs].filter((lang) => !presentLangs.includes(lang)).sort();
+    if (missingLangs.length) {
+      const presentText = presentLangs.length ? presentLangs.join(", ") : "inga";
+      const missingText = missingLangs.join(", ");
+      addFinding(findings, "error", `inconsistent_${codeStem}_langs`, `Elementet ${name} har deklarerat språk för "${presentText}" men inte för "${missingText}". Deklaration av båda språken måste finnas i metadata.`, profileRef);
     }
   }
 }
@@ -276,6 +325,9 @@ function validateEntity(entity) {
   for (const contact of contacts) {
     const type = contact.getAttribute("contactType") || "";
     contactCounts.set(type, (contactCounts.get(type) || 0) + 1);
+    if (xmlLang(contact)) {
+      addFinding(findings, "error", "contact_person_lang_forbidden", "ContactPerson f\u00e5r inte anv\u00e4nda `xml:lang`, eftersom det bara f\u00e5r finnas en ContactPerson per kontakt-typ enligt profilen.", contactRef);
+    }
     const email = firstDirectText(contact, NS.md, "EmailAddress");
     if (email && !email.startsWith("mailto:")) {
       invalidMailtoCount += 1;
@@ -308,6 +360,17 @@ function validateEntity(entity) {
     for (const scope of scopes) {
       const value = text(scope);
       const regexp = scope.getAttribute("regexp");
+      const parent = scope.parentElement;
+      const grandParent = parent?.parentElement;
+      const parentIsExtensions = parent?.namespaceURI === NS.md && parent?.localName === "Extensions";
+      const validGrandParent = grandParent && (
+        (grandParent.namespaceURI === NS.md && grandParent.localName === "EntityDescriptor") ||
+        (grandParent.namespaceURI === NS.md && grandParent.localName === "IDPSSODescriptor") ||
+        (grandParent.namespaceURI === NS.md && grandParent.localName === "AttributeAuthorityDescriptor")
+      );
+      if (!parentIsExtensions || !validGrandParent) {
+        addFinding(findings, "error", "scope_not_in_extensions", "`shibmd:Scope` \u00e4r inte placerat i ett till\u00e5tet `md:Extensions`-element.", "2.1.4 Scope");
+      }
       if (regexp !== null && regexp !== "false") {
         addFinding(findings, "error", "scope_regexp_must_be_false", "Scope anv\u00e4nder ett `regexp`-attribut som inte \u00e4r `false`, vilket avviker fr\u00e5n profilens krav.", "2.1.4 Scope");
       }
@@ -316,7 +379,7 @@ function validateEntity(entity) {
       }
     }
 
-    const supportedAttributes = descendantsByNs(idpDescriptor, NS.mdattr, "EntityAttributes").flatMap((group) => descendantsByNs(group, NS.saml, "Attribute"));
+    const supportedAttributes = directChildrenByNs(idpDescriptor, NS.saml, "Attribute");
     if (!supportedAttributes.length) {
       addFinding(findings, "error", "missing_supported_attributes", "Identity Provider saknar deklarerade supported attributes i metadata, vilket kr\u00e4vs enligt profilen.", "2.1.8 Supported attributes");
     }
@@ -454,6 +517,23 @@ export function validateSamlXml(xmlText) {
   }
 
   const entities = getEntityDescriptors(doc).map(validateEntity);
+  const entityIdCounts = new Map();
+  for (const entity of entities) {
+    if (!entity.entityId) continue;
+    entityIdCounts.set(entity.entityId, (entityIdCounts.get(entity.entityId) || 0) + 1);
+  }
+  for (const entity of entities) {
+    if (entity.entityId && (entityIdCounts.get(entity.entityId) || 0) > 1) {
+      entity.findings.push({
+        severity: "error",
+        code: "duplicate_entity_id_in_file",
+        message: "Det finns flera entiteter med samma `entityID` i filen.",
+        profileRef: "2.1.2 / 3.1.2 entityID",
+        suggestion: ACTIONS.duplicate_entity_id_in_file,
+      });
+      entity.errorCount += 1;
+    }
+  }
   entities.sort((a, b) => (b.errorCount - a.errorCount) || (b.warningCount - a.warningCount) || (a.entityId || "").localeCompare(b.entityId || ""));
 
   return {
